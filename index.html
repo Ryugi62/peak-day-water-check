@@ -18,10 +18,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system
 .back[hidden]{display:inline-flex;visibility:hidden}
 main{max-width:520px;margin:0 auto;padding:80px 20px 128px}
 .view{animation:in .18s ease-out}
-@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-h1{font-size:28px;line-height:1.3;margin:0 0 8px;font-weight:700;outline:none}
+@keyframes in{from{opacity:0}to{opacity:1}}
+h1{font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:700;outline:none}
 .lead{margin:0 0 24px;color:var(--sub);font-size:16px}
-label{display:block;margin:0 0 16px;font-size:14px;font-weight:600;color:var(--text)}
+label{display:block;margin:0 0 16px;scroll-margin:72px 0 120px;font-size:14px;font-weight:600;color:var(--text)}
 input,select{display:block;width:100%;min-height:52px;margin-top:8px;padding:12px 16px;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:12px;transition:border-color .12s}
 input:hover,select:hover{border-color:#b0b8c1}
 input:focus{outline:2px solid var(--brand);outline-offset:0;border-color:var(--brand)}
@@ -35,18 +35,21 @@ input.bad{border-color:var(--no-fg)}
 .cta:hover{background:var(--brand-press)}
 .cta:active{transform:scale(.98)}
 .cta:focus-visible,.back:focus-visible{outline:3px solid rgba(27,100,218,.4);outline-offset:2px}
-.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:600;margin:0 0 12px;background:var(--hold-bg);color:var(--hold-fg)}
-.mark{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font-size:20px;font-weight:800;margin:0 0 12px}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:600;margin:0 0 12px;background:#fff;border:1px solid #b0b8c1;color:var(--hold-fg)}
 .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 24px}
 .chip{min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:border-color .12s,background .12s,transform .08s}
 .chip:hover{border-color:#b0b8c1}.chip:active{transform:scale(.98)}
 .chip[aria-checked=true]{border-color:var(--brand);background:#e8f3ff;color:var(--brand)}
+.chip[aria-checked=true]:hover{border-color:var(--brand-press);background:#d9ebff}
 .chip:focus-visible{outline:3px solid rgba(27,100,218,.4);outline-offset:2px}
 .grp{font-size:14px;font-weight:600;margin:0}
-.promise{margin:0 0 24px;font-size:14px;font-weight:600;color:var(--text)}
+.promise{margin:0 0 8px;font-size:16px;color:var(--sub)}
+.example{margin:0 0 24px;font-size:14px;color:var(--sub)}
+.linkbtn{border:0;background:none;padding:12px 4px;font:inherit;font-weight:600;color:var(--brand);cursor:pointer;text-decoration:underline}
+.linkbtn:hover{color:var(--brand-press)}
+.gfx{display:block;margin:0 0 12px}
 .verdict{font-size:32px;line-height:1.25;font-weight:800;margin:0 0 16px;outline:none}
-.ok .vw{color:var(--ok-fg)}.mid .vw{color:var(--warn-fg)}.bad .vw{color:var(--no-fg)}.hold .vw{color:var(--hold-fg)}
-.ok .mark{background:var(--ok-bg);color:var(--ok-fg)}.mid .mark{background:var(--warn-bg);color:var(--warn-fg)}.bad .mark{background:var(--no-bg);color:var(--no-fg)}.hold .mark{background:var(--hold-bg);color:var(--hold-fg)}
+.ok .vw{color:var(--ok-fg)}.mid .vw{color:var(--warn-fg)}.bad .vw{color:var(--no-fg)}.hold .vw{color:#333d4b}
 .back:hover{background:var(--hold-bg)}
 .why{margin:0 0 32px;padding:0;list-style:none}
 .why li{padding:12px 0;border-top:1px solid var(--line);font-size:16px}
@@ -64,7 +67,7 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
 </head>
 <body>
 <header class="bar"><div class="bar-in">
-  <a class="back" id="back" href="#/" hidden aria-label="Back to the numbers">&lsaquo; Back</a>
+  <a class="back" id="back" href="#/" hidden aria-label="Back to the numbers"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</a>
   <div class="bar-title">Peak-Day Water Check</div><span></span>
 </div></header>
 <main id="app"></main>
@@ -77,25 +80,32 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
   var app = document.getElementById("app");
   var back = document.getElementById("back");
   var METHODS = {
-    evaporative: { label: "Evaporative", full: "Evaporative (chiller + cooling tower)", fields: ["net_supply_m3", "peak_day_m3", "cycles"] },
-    liquid: { label: "Hybrid", full: "Liquid + air hybrid", fields: ["net_supply_m3", "peak_day_m3", "cycles", "dry_basis"] },
-    hydrothermal: { label: "River or dam", full: "Hydrothermal (dam or river pass-through)", fields: ["heat_mw", "delta_t_k", "permit_flow_m3d", "source_distance_km"] },
-    direct_air: { label: "Direct air", full: "Direct evaporative air cooling", fields: [] }
+    evaporative: { label: "Evaporative", fields: ["net_supply_m3", "peak_day_m3", "cycles"] },
+    liquid: { label: "Hybrid", fields: ["net_supply_m3", "peak_day_m3", "cycles", "dry_basis"] },
+    hydrothermal: { label: "River or dam", fields: ["heat_mw", "delta_t_k", "permit_flow_m3d", "source_distance_km"] },
+    direct_air: { label: "Direct air", fields: [] }
   };
+  /* [label, kind, hint, example, range rule, range message] */
   var FIELD = {
-    net_supply_m3: ["Net water supply (m³/day)", "number", "Reclaimed water you can count on in a dry season", "3630"],
-    peak_day_m3: ["Peak-day cooling water need (m³/day)", "number", "Cooling make-up water on the hottest day", "2610"],
-    cycles: ["Cycles of concentration (N)", "number", "How many times cooling water is reused; must be above 1. It is checked for range only and does not change the ratio", "3"],
-    dry_basis: ["Dry-cooling basis", "text", "One sentence from the chiller maker's sheet"],
-    heat_mw: ["Heat to reject (MW)", "number", "From the design document", "48"],
-    delta_t_k: ["Allowed temperature rise (K)", "number", "The river authority's discharge limit", "7"],
-    permit_flow_m3d: ["Permitted intake (m³/day)", "number", "From the intake consultation reply", "3000"],
-    source_distance_km: ["Distance to river or dam (km)", "number", "Road distance to the intake point", "5"]
+    net_supply_m3: ["Net water supply (m³/day)", "number", "Reclaimed water you can count on in a dry season", "3630", function (n) { return n >= 0; }, "0 or more"],
+    peak_day_m3: ["Peak-day cooling water need (m³/day)", "number", "Cooling make-up water on the hottest day", "2610", function (n) { return n > 0; }, "above 0"],
+    cycles: ["Cycles of concentration (N)", "number", "Must be above 1. Used to confirm the tower can run at this water quality; it does not change the ratio", "3", function (n) { return n > 1; }, "above 1"],
+    dry_basis: ["Dry-cooling basis", "text", "One sentence from the chiller maker's sheet", "Maker sheet: dry coolers carry 30% of peak load"],
+    heat_mw: ["Heat to reject (MW)", "number", "From the design document", "48", function (n) { return n > 0; }, "above 0"],
+    delta_t_k: ["Allowed temperature rise (K)", "number", "The river authority's discharge limit", "7", function (n) { return n > 0; }, "above 0"],
+    permit_flow_m3d: ["Permitted intake (m³/day)", "number", "From the intake consultation reply", "3000", function (n) { return n > 0; }, "above 0"],
+    source_distance_km: ["Distance to river or dam (km)", "number", "Road distance to the intake point", "5", function (n) { return n >= 0; }, "0 or more"]
   };
-  var DEFAULTS = { method: "evaporative", net_supply_m3: "3630", peak_day_m3: "2610", cycles: "3", heat_mw: "48" };
   var STATION = "156 (Gwangju)";   /* example site's weather station, shown as fine print */
   var ALL_KEYS = Object.keys(FIELD);
   var CLS = { "Fit": "ok", "Conditional": "mid", "Not fit": "bad", "Hold": "hold" };
+  var lastHref = "";
+
+  /* State rule: S holds only the values the person typed (blank included), shared by every method.
+     A field not in S shows its example value for the chosen method. */
+  function example(k) { return FIELD[k][3]; }
+  function valueOf(S, k) { return Object.prototype.hasOwnProperty.call(S, k) ? S[k] : example(k); }
+  function edited(S) { return Object.keys(S).some(function (k) { return S[k] !== example(k); }); }
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function parseHash() {
@@ -104,8 +114,10 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     if (q >= 0) h.slice(q + 1).split("&").forEach(function (kv) { if (!kv) return; var i = kv.indexOf("="); params[decodeURIComponent(i < 0 ? kv : kv.slice(0, i))] = i < 0 ? "" : decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " ")); });
     return { route: route, params: params };
   }
-  function toHash(route, vals) {
-    return "#" + route + "?" + Object.keys(vals).filter(function (k) { return vals[k] !== "" && vals[k] !== undefined; }).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(vals[k]); }).join("&");
+  function toHash(route, m, S) {
+    var parts = ["method=" + encodeURIComponent(m)];
+    Object.keys(S).forEach(function (k) { parts.push(encodeURIComponent(k) + "=" + encodeURIComponent(S[k])); });
+    return "#" + route + "?" + parts.join("&");
   }
   function fmt(n) { return Number(n).toLocaleString("en-US", { maximumFractionDigits: 1 }); }
   function setView(html, focusSel) {
@@ -114,34 +126,14 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     var f = app.querySelector(focusSel); if (f) f.focus({ preventScroll: true });
   }
 
-  function currentVals(form) {
-    var v = { method: form.method.value };
-    ALL_KEYS.forEach(function (k) { if (form.elements[k]) v[k] = form.elements[k].value; });
-    return v;
-  }
-
-  function renderCheck(vals, error) {
-    var m = vals.method in METHODS ? vals.method : "evaporative";
-    var ek = error && typeof error === "object" ? error.key : "";
-    var fields = METHODS[m].fields.map(function (k) {
-      var f = FIELD[k], v = vals[k] === undefined ? "" : vals[k], bad = ek === k;
-      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '" placeholder="Unknown? Leave blank"' + (bad ? ' class="bad" aria-invalid="true" aria-describedby="f-' + k + '-err"' : "") + '><span class="hint">' + esc(f[2]) + "</span>" +
-        (bad ? '<span class="ferr" id="f-' + k + '-err" role="alert">' + esc(error.msg) + "</span>" : "") + "</label>";
-    }).join("");
-    var chips = Object.keys(METHODS).map(function (k) { return '<button type="button" class="chip" role="radio" data-m="' + k + '" aria-checked="' + (k === m) + '">' + esc(METHODS[k].label) + "</button>"; }).join("");
-    var stationNote = '<p class="fine">Example site: Jangseong, Korea, 40 MW' + ((m === "evaporative" || m === "liquid") ? ". Weather station: " + esc(STATION) : "") + ".</p>";
-    var none = METHODS[m].fields.length ? "" : '<p class="lead">This method has no numbers to enter. We tell you why it is not judged.</p>';
-    var banner = typeof error === "string" ? '<p class="err" role="alert" id="error">' + esc(error) + "</p>" : "";
-    setView('<h1 id="h" tabindex="-1">Will this site have enough water on its hottest day?</h1>' +
-      '<p class="promise" id="promise">Don\'t know a number? Leave it blank. We hold the verdict instead of guessing.</p>' + banner +
-      '<form id="form" novalidate><p class="grp" id="grp">Cooling method</p><div class="chips" role="radiogroup" aria-labelledby="grp">' + chips + '</div><input type="hidden" name="method" value="' + m + '">' + none + fields + stationNote +
-      '<div class="cta-wrap"><button class="cta" id="go" type="submit">' + (METHODS[m].fields.length ? "Check this site" : "See why") + "</button></div></form>", ek ? "#f-" + ek : "#h");
-    back.hidden = true;
-    var form = document.getElementById("form");
-    Array.prototype.forEach.call(form.querySelectorAll(".chip"), function (c) {
-      c.addEventListener("click", function () { var v = currentVals(form); v.method = c.getAttribute("data-m"); history.replaceState(null, "", toHash("/", v)); renderCheck(v); });
+  /* read the visible form into S: keep a value only if it differs from the example or was already typed */
+  function collect(form, S) {
+    var out = {}; Object.keys(S).forEach(function (k) { out[k] = S[k]; });
+    ALL_KEYS.forEach(function (k) {
+      var el = form.elements[k]; if (!el) return;
+      if (el.value !== example(k) || Object.prototype.hasOwnProperty.call(out, k)) out[k] = el.value;
     });
-    form.addEventListener("submit", function (e) { e.preventDefault(); var v = currentVals(form); history.replaceState(null, "", toHash("/", v)); location.hash = toHash("/result", v); });
+    return out;
   }
 
   function num(raw, label, ex) {
@@ -152,25 +144,73 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     return { value: n };
   }
 
-  function renderResult(vals) {
-    var m = vals.method in METHODS ? vals.method : "evaporative";
-    var facts = {}, errors = [];
+  /* returns {facts} or {error:{key,msg}}; format and range errors both name the field */
+  function validate(m, S) {
+    var facts = {};
     if (m === "evaporative" || m === "liquid") facts.weather_station = STATION;
-    METHODS[m].fields.forEach(function (k) {
-      if (FIELD[k][1] === "text") { if (String(vals[k] || "").trim()) facts[k] = String(vals[k]).trim(); return; }
-      var r = num(vals[k], FIELD[k][0], FIELD[k][3]); if (r.error) errors.push({ key: k, msg: r.error }); else if (!r.blank) facts[k] = r.value;
+    for (var i = 0; i < METHODS[m].fields.length; i++) {
+      var k = METHODS[m].fields[i], f = FIELD[k], raw = valueOf(S, k);
+      if (f[1] === "text") { if (String(raw).trim()) facts[k] = String(raw).trim(); continue; }
+      var r = num(raw, f[0], f[3]);
+      if (r.error) return { error: { key: k, msg: r.error } };
+      if (r.blank) continue;
+      if (f[4] && !f[4](r.value)) return { error: { key: k, msg: f[0] + " must be " + f[5] + ". Try " + f[3] + "." } };
+      facts[k] = r.value;
+    }
+    return { facts: facts };
+  }
+
+  function renderCheck(m, S, error) {
+    var ek = error ? error.key : "";
+    var fields = METHODS[m].fields.map(function (k) {
+      var f = FIELD[k], v = valueOf(S, k), bad = ek === k;
+      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '"' + (bad ? ' class="bad" aria-invalid="true" aria-describedby="f-' + k + '-err"' : "") + '><span class="hint">' + esc(f[2]) + "</span>" +
+        (bad ? '<span class="ferr" id="f-' + k + '-err" role="alert">' + esc(error.msg) + "</span>" : "") + "</label>";
+    }).join("");
+    var chips = Object.keys(METHODS).map(function (k) { return '<button type="button" class="chip" role="radio" data-m="' + k + '" aria-checked="' + (k === m) + '">' + esc(METHODS[k].label) + "</button>"; }).join("");
+    var station = (m === "evaporative" || m === "liquid") ? '<p class="fine">Weather station: ' + esc(STATION) + ".</p>" : "";
+    var none = METHODS[m].fields.length ? "" : '<p class="lead">This method has no numbers to enter. We tell you why it is not judged.</p>';
+    var reset = edited(S) ? ' <button type="button" class="linkbtn" id="reset">Reset to example</button>' : "";
+    setView('<h1 id="h" tabindex="-1">Will this site have enough water on its hottest day?</h1>' +
+      '<p class="promise" id="promise">Don\'t know a number? Leave it blank. We hold the verdict instead of guessing.</p>' +
+      '<p class="example" id="example">Example site: Jangseong, Korea, 40 MW.' + reset + '</p>' +
+      '<form id="form" novalidate><p class="grp" id="grp">Cooling method</p><div class="chips" role="radiogroup" aria-labelledby="grp">' + chips + '</div><input type="hidden" name="method" value="' + m + '">' + none + fields + station +
+      '<div class="cta-wrap"><button class="cta" id="go" type="submit">' + (METHODS[m].fields.length ? "Check this site" : "See why") + "</button></div></form>", ek ? "#f-" + ek : "#h");
+    back.hidden = true;
+    if (ek) { var lab = document.getElementById("f-" + ek).parentNode; lab.scrollIntoView({ block: "center" }); }
+    var form = document.getElementById("form");
+    Array.prototype.forEach.call(form.querySelectorAll(".chip"), function (c) {
+      c.addEventListener("click", function () {
+        var nS = collect(form, S), nm = c.getAttribute("data-m");
+        history.replaceState(history.state, "", toHash("/", nm, nS)); lastHref = location.href; renderCheck(nm, nS);
+      });
     });
-    if (errors.length) { renderCheck(vals, errors[0]); history.replaceState(null, "", toHash("/", vals)); return; }
+    var rs = document.getElementById("reset");
+    if (rs) rs.addEventListener("click", function () {
+      history.replaceState(history.state, "", toHash("/", m, {})); lastHref = location.href; renderCheck(m, {});
+    });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var nS = collect(form, S), chk = toHash("/", m, nS), v = validate(m, nS);
+      history.replaceState(history.state, "", chk);
+      if (v.error) { lastHref = location.href; renderCheck(m, nS, v.error); return; }
+      history.pushState({ from: 1 }, "", toHash("/result", m, nS)); route();
+    });
+  }
+
+  function renderResult(m, S) {
+    var v = validate(m, S);
+    if (v.error) { history.replaceState(null, "", toHash("/", m, S)); lastHref = location.href; renderCheck(m, S, v.error); return; }
     var res;
-    try { res = P.judgeOption(m, facts); }
-    catch (e) { renderCheck(vals, "One number is out of range. Peak-day need and heat must be above 0, cycles above 1, temperature rise above 0."); history.replaceState(null, "", toHash("/", vals)); return; }
+    try { res = P.judgeOption(m, v.facts); }
+    catch (e) { var k0 = METHODS[m].fields[0]; history.replaceState(null, "", toHash("/", m, S)); lastHref = location.href; renderCheck(m, S, { key: k0, msg: "A number is out of range. Check " + FIELD[k0][0] + " and the others." }); return; }
     var head, why;
     if (res.outOfScope) {
       head = "Hold · not judged";
-      why = ["The engine has no water-use physics for direct evaporative air cooling.", "We hold the verdict instead of guessing."];
+      why = ["The engine has no water-use physics for direct evaporative air cooling.", "Pick Evaporative, Hybrid, or River or dam to get a verdict."];
     } else if (res.status === "Hold") {
       head = "Hold · measure first";
-      why = ["Not enough measured facts to judge this site.", "We never fill a missing number with a guess."];
+      why = ["Not enough measured facts to judge this site.", "Blank: " + res.missing.filter(function (x) { return FIELD[x.key]; }).map(function (x) { return FIELD[x.key][0].replace(/\s*\(.*\)$/, ""); }).join(", ") + ". We never fill a missing number with a guess."];
     } else {
       head = res.status + " · " + res.ratio.toFixed(2) + "×";
       var unit = m === "hydrothermal" ? ["Permitted intake ", " m³/day ÷ flow needed to carry the heat ", " m³/day"] : ["Net supply ", " m³/day ÷ peak-day need ", " m³/day"];
@@ -181,28 +221,48 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     var items = res.missing.length ? res.missing : (res.outOfScope ? [] : P.REQUIRED[m].map(function (k) { return { name: P.MEASURE[k][0], how: P.MEASURE[k][1] }; }));
     var todo = items.length
       ? '<ul class="todo">' + items.map(function (x) { return "<li><b>" + esc(x.name) + "</b><span>" + esc(x.how) + "</span></li>"; }).join("") + "</ul>"
-      : '<p class="done">Pick another cooling method to get a verdict.</p>';
+      : '<p class="done">Nothing to measure for this method.</p>';
     var h2 = res.missing.length ? "Measure next" : (res.outOfScope ? "Next step" : "Confirm with real data");
-    var glyph = { ok: "\u2713", mid: "!", bad: "\u2715", hold: "?" }[cls];
     var rest = head.slice(res.status.length);
-    setView('<div class="' + cls + '"><span class="mark" aria-hidden="true">' + glyph + "</span><br>" +
+    setView('<div class="' + cls + '">' + GFX[cls] +
       '<h1 class="verdict" id="h" tabindex="-1"><span class="vw">' + esc(res.status) + "</span>" + esc(rest) + "</h1>" +
-      '<span class="pill">' + esc(METHODS[m].full) + "</span></div>" +
+      '<span class="pill">' + esc(METHODS[m].label) + "</span></div>" +
       '<ul class="why"><li>' + esc(why[0]) + "</li><li>" + esc(why[1]) + "</li></ul>" +
       "<h2>" + h2 + "</h2>" + todo +
       '<p class="src">Runs in your browser. Same rule as the open-source engine: <a href="https://github.com/Ryugi62/peak-day-water-check">github.com/Ryugi62/peak-day-water-check</a></p>' +
-      '<div class="cta-wrap"><a class="cta" id="change" href="' + toHash("/", vals) + '">' + (res.outOfScope ? "Pick another method" : "Change numbers") + "</a></div>", "#h");
-    back.hidden = false; back.setAttribute("href", toHash("/", vals));
+      '<div class="cta-wrap"><a class="cta" id="change" href="' + toHash("/", m, S) + '">' + (res.outOfScope ? "Pick another method" : "Change numbers") + "</a></div>", "#h");
+    back.hidden = false; back.setAttribute("href", toHash("/", m, S));
+    document.getElementById("change").addEventListener("click", goBack);
   }
 
-  function route() {
-    var p = parseHash(), vals = {};
-    Object.keys(DEFAULTS).forEach(function (k) { vals[k] = DEFAULTS[k]; });
-    var hasParams = Object.keys(p.params).length > 0;
-    if (hasParams) { vals = { method: "evaporative" }; Object.keys(p.params).forEach(function (k) { vals[k] = p.params[k]; }); }
-    if (p.route === "/result") renderResult(vals); else renderCheck(vals);
+  /* one history step: Back and Change numbers pop the entry the Check button pushed; a deep link just swaps in place */
+  function goBack(e) {
+    e.preventDefault();
+    if (history.state && history.state.from) { history.back(); return; }
+    var p = parseHash(), S = stateOf(p), m = methodOf(p);
+    history.replaceState(null, "", toHash("/", m, S)); route();
   }
-  window.addEventListener("hashchange", route);
+  back.addEventListener("click", goBack);
+
+  var DROP = "M36 7C36 7 15 31 15 46a21 21 0 0 0 42 0C57 31 36 7 36 7Z";
+  function svg(inner) { return '<svg class="gfx" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">' + inner + "</svg>"; }
+  var GFX = {
+    ok: svg('<path d="' + DROP + '" fill="#e6fcf5" stroke="#087f5b" stroke-width="3"/><path d="M26 44l7 7 14-15" fill="none" stroke="#087f5b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'),
+    mid: svg('<defs><clipPath id="lv"><rect x="0" y="40" width="72" height="40"/></clipPath></defs><path d="' + DROP + '" fill="#fff4e6" stroke="#9c4f00" stroke-width="3"/><path d="' + DROP + '" fill="#f4b46a" clip-path="url(#lv)"/>'),
+    bad: svg('<path d="' + DROP + '" fill="#ffebee" stroke="#c62828" stroke-width="3"/><path d="M28 38l16 16M44 38L28 54" stroke="#c62828" stroke-width="4" stroke-linecap="round"/>'),
+    hold: svg('<path d="' + DROP + '" fill="#fff" stroke="#4e5968" stroke-width="3" stroke-dasharray="6 5"/><path d="M30 41a6 6 0 1 1 9 5c-2 1.5-3 2.5-3 5" fill="none" stroke="#4e5968" stroke-width="4" stroke-linecap="round"/><circle cx="36" cy="58" r="2.5" fill="#4e5968"/>')
+  };
+
+  function methodOf(p) { return p.params.method in METHODS ? p.params.method : "evaporative"; }
+  function stateOf(p) { var S = {}; Object.keys(p.params).forEach(function (k) { if (FIELD[k]) S[k] = p.params[k]; }); return S; }
+  function route() {
+    var p = parseHash(), m = methodOf(p), S = stateOf(p);
+    lastHref = location.href;
+    if (p.route === "/result") renderResult(m, S); else renderCheck(m, S);
+  }
+  function onNav() { if (location.href !== lastHref) route(); }
+  window.addEventListener("hashchange", onNav);
+  window.addEventListener("popstate", onNav);
   route();
 })();
 </script>

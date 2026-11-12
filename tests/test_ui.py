@@ -37,12 +37,12 @@ class UiTest(unittest.TestCase):
         for status, q in (("Fit", "net_supply_m3=5000&peak_day_m3=2000&cycles=4"),
                           ("Conditional", "net_supply_m3=3630&peak_day_m3=2610&cycles=3"),
                           ("Not fit", "net_supply_m3=1000&peak_day_m3=2610&cycles=3"),
-                          ("Hold", "cycles=3")):
+                          ("Hold", "net_supply_m3=&peak_day_m3=&cycles=3")):
             p = self.page("#/result?method=evaporative&" + q)
             w = p.locator(".verdict .vw")
             self.assertEqual(w.inner_text(), status)
             colors[status] = w.evaluate("e=>getComputedStyle(e).color")
-            self.assertEqual(p.locator(".pill").evaluate("e=>getComputedStyle(e).backgroundColor"), "rgb(242, 244, 246)")
+            self.assertEqual(p.locator(".pill").evaluate("e=>getComputedStyle(e).color"), "rgb(78, 89, 104)")
         self.assertEqual(len(set(colors.values())), 4, colors)
 
     # 3 method = chips (<=5), nothing clipped at 390
@@ -80,7 +80,7 @@ class UiTest(unittest.TestCase):
     def test_no_box_shadow_and_units(self):
         src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
         self.assertNotIn("box-shadow", src)
-        p = self.page("#/result?method=evaporative&cycles=3")
+        p = self.page("#/result?method=evaporative&cycles=3&net_supply_m3=1")
         t = p.locator("#app").inner_text()
         self.assertNotIn("m3/day", t); self.assertNotIn("TMS", t); self.assertNotIn("ASOS", t)
 
