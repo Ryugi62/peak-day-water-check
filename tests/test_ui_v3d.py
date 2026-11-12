@@ -71,9 +71,9 @@ class V3d(Base):
     def test_reset_slot_reserved_no_layout_shift(self):
         p = self.page()
         ys0 = [p.locator(s).bounding_box()["y"] for s in (".chips", "#f-net_supply_m3")]
-        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).visibility"), "hidden")
+        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).display"), "none")
         p.fill("#f-net_supply_m3", "1000"); p.tap("#go"); self.verdict(p); p.tap("#change"); p.wait_for_selector("#go")
-        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).visibility"), "visible")
+        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).display"), "block")
         ys1 = [p.locator(s).bounding_box()["y"] for s in (".chips", "#f-net_supply_m3")]
         self.assertEqual(ys0, ys1)
 

@@ -18,6 +18,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system
 .back[hidden]{display:inline-flex;visibility:hidden}
 main{max-width:520px;margin:0 auto;padding:80px 20px 128px}
 .view{animation:in .18s ease-out}
+.view.still{animation:none}
 @keyframes in{from{opacity:0}to{opacity:1}}
 h1{font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:700;outline:none;scroll-margin-top:72px}
 .lead{margin:0 0 24px;color:var(--sub);font-size:16px}
@@ -26,9 +27,11 @@ input,select{display:block;width:100%;min-height:52px;margin-top:8px;padding:12p
 input:hover,select:hover{border-color:#b0b8c1}
 input:focus{outline:2px solid var(--brand);outline-offset:0;border-color:var(--brand)}
 input.bad{border-color:var(--no-fg)}
+input.bad:focus{outline-color:var(--no-fg)}
 .ferr{display:block;margin-top:4px;font-size:14px;font-weight:600;color:var(--no-fg)}
 .hint{display:block;margin-top:4px;font-size:14px;font-weight:400;color:var(--sub)}
 .fine{font-size:14px;color:var(--sub);margin:8px 0 0}
+.rule{margin:0 0 32px}
 .err{background:var(--no-bg);color:var(--no-fg);border-radius:12px;padding:12px 16px;margin:0 0 24px;font-size:14px;font-weight:600}
 .cta-wrap{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:16px 20px calc(16px + env(safe-area-inset-bottom));z-index:9}
 .sub{display:block;max-width:480px;margin:0 auto;min-height:44px;line-height:44px;text-align:center;font-weight:600;color:var(--brand);text-decoration:none;border-radius:12px}
@@ -47,14 +50,15 @@ input.bad{border-color:var(--no-fg)}
 .chip:focus-visible{outline:3px solid rgba(27,100,218,.4);outline-offset:2px}
 .grp{font-size:14px;font-weight:600;margin:0}
 .promise{margin:0 0 8px;font-size:16px;color:var(--sub)}
+.example span{white-space:nowrap}
 .example{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:0 0 16px;font-size:14px;color:var(--sub)}
-.linkbtn{border:0;background:none;padding:12px 0;min-height:44px;font:inherit;font-size:14px;font-weight:600;color:var(--brand);cursor:pointer;white-space:nowrap}
-.linkbtn:hover{color:var(--brand-press)}.linkbtn:disabled{visibility:hidden}
+.linkbtn{border:0;background:none;padding:0;height:44px;font:inherit;font-size:14px;font-weight:600;color:var(--brand);cursor:pointer;white-space:nowrap}
+.linkbtn:hover{color:var(--brand-press)}.linkbtn:disabled{display:none}
 .gfx{display:block;margin:0 0 12px}
 .verdict{font-size:32px;line-height:1.25;font-weight:800;margin:0 0 16px;outline:none}
 .ok .vw{color:var(--ok-fg)}.mid .vw{color:var(--warn-fg)}.bad .vw{color:var(--no-fg)}.hold .vw{color:#333d4b}
 .back:hover{background:var(--hold-bg)}
-.why{margin:0 0 32px;padding:0;list-style:none}
+.why{margin:0 0 16px;padding:0;list-style:none}
 .why li{padding:12px 0;border-top:1px solid var(--line);font-size:16px}
 .why li:last-child{border-bottom:1px solid var(--line)}
 h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
@@ -93,7 +97,7 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     net_supply_m3: ["Net water supply (m³/day)", "number", "Reclaimed water you can count on in a dry season", "3630", function (n) { return n >= 0; }, "0 or more"],
     peak_day_m3: ["Peak-day cooling water need (m³/day)", "number", "Cooling make-up water on the hottest day", "2610", function (n) { return n > 0; }, "above 0"],
     cycles: ["Cycles of concentration (N)", "number", "Must be above 1. Checks the tower can run at this water quality.", "3", function (n) { return n > 1; }, "above 1"],
-    dry_basis: ["Dry-cooling basis", "text", "One sentence from the chiller maker's sheet", "Maker sheet: dry coolers carry 30% of peak load"],
+    dry_basis: ["Source for the dry-cooling share", "text", "Cited in the result. It does not change the ratio.", "Maker sheet: dry-cooler duty table"],
     heat_mw: ["Heat to reject (MW)", "number", "From the design document", "48", function (n) { return n > 0; }, "above 0"],
     delta_t_k: ["Allowed temperature rise (K)", "number", "The river authority's discharge limit", "7", function (n) { return n > 0; }, "above 0"],
     permit_flow_m3d: ["Permitted intake (m³/day)", "number", "From the intake consultation reply", "3000", function (n) { return n > 0; }, "above 0"],
@@ -101,7 +105,7 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
   };
   /* per-method example values: same 40 MW Jangseong site, sized for each cooling method (the verdict rule is unchanged) */
   var EX = {
-    liquid: { peak_day_m3: "1566", dry_basis: "Maker sheet: dry coolers carry 40% of peak load" },
+    liquid: { peak_day_m3: "1566", dry_basis: "Maker sheet: dry-cooler duty table" },
     hydrothermal: { permit_flow_m3d: "200000" }
   };
   var STATION = "156 (Gwangju)";   /* example site's weather station, shown as fine print */
@@ -129,11 +133,14 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     return "#" + route + "?" + parts.join("&");
   }
   function fmt(n) { return Number(n).toLocaleString("en-US", { maximumFractionDigits: 1 }); }
-  function setView(html, focusSel) {
-    app.innerHTML = '<div class="view">' + html + "</div>";
-    window.scrollTo(0, 0); requestAnimationFrame(function () { if (!app.querySelector('.ferr')) window.scrollTo(0, 0); });
+  /* keepY: number = draw in place (no fade) and put the page back at that scroll position; null = new screen, top */
+  function setView(html, focusSel, keepY) {
+    var inPlace = typeof keepY === "number", y = inPlace ? keepY : 0;
+    app.innerHTML = '<div class="view' + (inPlace ? " still" : "") + '">' + html + "</div>";
+    window.scrollTo(0, y); requestAnimationFrame(function () { if (!app.querySelector('.ferr')) window.scrollTo(0, y); });
     var f = app.querySelector(focusSel); if (f) f.focus({ preventScroll: true });
   }
+  var returnY = null;   /* where the numbers screen was scrolled when Check was pressed */
 
   /* read the visible form into S: keep a value only if it differs from the example or was already typed */
   function collect(form, S, m) {
@@ -169,11 +176,11 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     return { facts: facts };
   }
 
-  function renderCheck(m, S, error) {
+  function renderCheck(m, S, error, keepY) {
     var ek = error ? error.key : "";
     var fields = METHODS[m].fields.map(function (k) {
       var f = FIELD[k], v = valueOf(S, k, m), bad = ek === k;
-      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '"' + (bad ? ' class="bad" aria-invalid="true" aria-describedby="f-' + k + '-err"' : "") + '><span class="hint">' + esc(f[2]) + "</span>" +
+      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '" placeholder="Not measured yet"' + (bad ? ' class="bad" aria-invalid="true" aria-describedby="f-' + k + '-err"' : "") + '>' + (bad ? "" : '<span class="hint">' + esc(f[2]) + "</span>") +
         (bad ? '<span class="ferr" id="f-' + k + '-err" role="alert">' + esc(error.msg) + "</span>" : "") + "</label>";
     }).join("");
     var chips = Object.keys(METHODS).map(function (k) { return '<button type="button" class="chip" role="radio" data-m="' + k + '" aria-checked="' + (k === m) + '">' + esc(METHODS[k].label) + "</button>"; }).join("");
@@ -181,29 +188,30 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     var none = METHODS[m].fields.length ? "" : '<p class="lead">This method has no numbers to enter. We tell you why it is not judged.</p>';
     var ed = edited(S, m);
     var reset = '<button type="button" class="linkbtn" id="reset"' + (ed ? "" : ' disabled tabindex="-1" aria-hidden="true"') + '>Reset to example</button>';
-    setView('<h1 id="h" tabindex="-1">Will this site have enough water on its hottest day?</h1>' +
+    setView(GFX.idle + '<h1 id="h" tabindex="-1">Will this site have enough water on its hottest day?</h1>' +
       '<p class="promise" id="promise">Don\'t know a number? Leave it blank. We hold the verdict instead of guessing.</p>' +
-      '<div class="example" id="example"><span>Example: Jangseong, Korea, 40 MW</span>' + reset + '</div>' +
+      '<div class="example" id="example"><span>Example: Jangseong, Korea, 40\u00a0MW</span>' + reset + '</div>' +
       '<form id="form" novalidate><p class="grp" id="grp">Cooling method</p><div class="chips" role="radiogroup" aria-labelledby="grp">' + chips + '</div><input type="hidden" name="method" value="' + m + '">' + none + fields + station +
-      '<div class="cta-wrap"><button class="cta" id="go" type="submit">' + (METHODS[m].fields.length ? "Check this site" : "See why") + "</button></div></form>", ek ? "#f-" + ek : "#h");
+      '<div class="cta-wrap"><button class="cta" id="go" type="submit">' + (METHODS[m].fields.length ? "Check this site" : "See why") + "</button></div></form>", ek ? "#f-" + ek : (typeof keepY === "number" ? ".chip[aria-checked=true]" : "#h"), keepY);
     back.hidden = true;
     if (ek) { var lab = document.getElementById("f-" + ek).parentNode; lab.scrollIntoView({ block: "center" }); }
     var form = document.getElementById("form");
     Array.prototype.forEach.call(form.querySelectorAll(".chip"), function (c) {
       c.addEventListener("click", function () {
         var nS = collect(form, S, m), nm = c.getAttribute("data-m");
-        history.replaceState(history.state, "", toHash("/", nm, nS)); lastHref = location.href; renderCheck(nm, nS);
+        history.replaceState(history.state, "", toHash("/", nm, nS)); lastHref = location.href; renderCheck(nm, nS, undefined, window.scrollY);
       });
     });
     var rs = document.getElementById("reset");
     if (rs && ed) rs.addEventListener("click", function () {
-      history.replaceState(history.state, "", toHash("/", m, {})); lastHref = location.href; renderCheck(m, {});
+      history.replaceState(history.state, "", toHash("/", m, {})); lastHref = location.href; renderCheck(m, {}, undefined, window.scrollY);
     });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var nS = collect(form, S, m), chk = toHash("/", m, nS), v = validate(m, nS);
       history.replaceState(history.state, "", chk);
       if (v.error) { lastHref = location.href; renderCheck(m, nS, v.error); return; }
+      returnY = window.scrollY;
       history.pushState({ from: 1 }, "", toHash("/result", m, nS)); route();
     });
   }
@@ -228,8 +236,8 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
       var need = river ? "the flow needed to carry the heat" : "the peak-day need";
       var because = { "Fit": "supply is at least 2× " + need + ".", "Conditional": "supply covers " + need + ", with under 2× to spare.", "Not fit": "supply falls short of " + need + "." }[res.status];
       why = [unit[0] + fmt(res.numerator) + unit[1] + fmt(res.denominator) + unit[2] + " = " + res.ratio.toFixed(2) + "×.",
-        "Why " + res.status + ": " + because + " Rule: 2× or more is Fit, 1× to 2× is Conditional, under 1× is Not fit."];
-      if (m === "liquid") why.push("Hybrid: the peak-day need counts only what dry coolers leave (" + v.facts.dry_basis + ").");
+        "Why " + res.status + ": " + because + ""];
+      if (m === "liquid") why.push("Hybrid: enter the peak-day need that remains after the dry coolers. Source: " + v.facts.dry_basis + ". It does not change the ratio.");
     }
     var cls = CLS[res.status];
     var items = res.missing.length ? res.missing : (res.outOfScope ? [] : P.REQUIRED[m].map(function (k) { return { name: P.MEASURE[k][0], how: P.MEASURE[k][1] }; }));
@@ -242,6 +250,7 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
       '<h1 class="verdict" id="h" tabindex="-1"><span class="vw">' + esc(res.status) + "</span>" + esc(rest) + "</h1>" +
       '<span class="pill">' + esc(METHODS[m].label) + "</span></div>" +
       '<ul class="why">' + why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>" +
+      (res.status === "Hold" ? "" : '<p class="fine rule">Rule: 2× or more is Fit · 1× to 2× is Conditional · under 1× is Not fit.</p>') +
       (res.outOfScope ? "" : "<h2>" + h2 + "</h2>" + todo) +
       '<p class="src">Runs in your browser. Same rule as the open-source engine: <a href="https://github.com/Ryugi62/peak-day-water-check">github.com/Ryugi62/peak-day-water-check</a></p>' +
       '<div class="cta-wrap">' + (res.outOfScope
@@ -277,6 +286,7 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
   var DROP = "M36 7C36 7 15 31 15 46a21 21 0 0 0 42 0C57 31 36 7 36 7Z";
   function svg(inner) { return '<svg class="gfx" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">' + inner + "</svg>"; }
   var GFX = {
+    idle: '<svg class="gfx" width="40" height="40" viewBox="0 0 72 72" aria-hidden="true"><path d="' + DROP + '" fill="#e8f3ff" stroke="#1b64da" stroke-width="3"/></svg>',
     ok: svg('<path d="' + DROP + '" fill="#e6fcf5" stroke="#087f5b" stroke-width="3"/><path d="M26 44l7 7 14-15" fill="none" stroke="#087f5b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'),
     mid: svg('<defs><clipPath id="lv"><rect x="0" y="40" width="72" height="40"/></clipPath></defs><path d="' + DROP + '" fill="#fff4e6" stroke="#9c4f00" stroke-width="3"/><path d="' + DROP + '" fill="#f4b46a" clip-path="url(#lv)"/>'),
     bad: svg('<path d="' + DROP + '" fill="#ffebee" stroke="#c62828" stroke-width="3"/><path d="M28 38l16 16M44 38L28 54" stroke="#c62828" stroke-width="4" stroke-linecap="round"/>'),
@@ -288,7 +298,8 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
   function route() {
     var p = parseHash(), m = methodOf(p), S = stateOf(p);
     lastHref = location.href;
-    if (p.route === "/result") renderResult(m, S); else renderCheck(m, S);
+    if (p.route === "/result") renderResult(m, S);
+    else { var y = returnY; returnY = null; renderCheck(m, S, undefined, y === null ? undefined : y); }
   }
   function onNav() { if (location.href !== lastHref) route(); }
   window.addEventListener("hashchange", onNav);

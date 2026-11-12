@@ -40,14 +40,14 @@ class V3c(Base):
     # 3 reset-to-example link: hidden until something differs, then restores everything
     def test_reset_to_example(self):
         p = self.page()
-        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).visibility"), "hidden")
+        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).display"), "none")
         p.fill("#f-net_supply_m3", "1"); p.locator("[role=radio]", has_text="River").tap()
         p.fill("#f-heat_mw", "5")
         p.tap("#reset")
         self.assertEqual(p.input_value("#f-heat_mw"), "48")
         p.locator("[role=radio]", has_text="Evaporative").tap()
         self.assertEqual(p.input_value("#f-net_supply_m3"), "3630")
-        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).visibility"), "hidden")
+        self.assertEqual(p.locator("#reset").evaluate("e=>getComputedStyle(e).display"), "none")
 
     # 4 explicit blank still means Hold
     def test_blank_is_hold(self):
