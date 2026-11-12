@@ -119,7 +119,7 @@ class V3c(Base):
             p = self.page("#/result?method=evaporative&" + q)
             g = p.locator(".gfx"); b = g.bounding_box()
             self.assertTrue(64 <= b["width"] <= 96 and 64 <= b["height"] <= 96, b)
-            seen.add(g.inner_html())
+            seen.add(g.get_attribute("src"))
         self.assertEqual(len(seen), 4)
 
     # 8 hold word is dark, pill is an outline (not status colored), pill = chip name

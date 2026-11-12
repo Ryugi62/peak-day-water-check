@@ -4,6 +4,11 @@ from tests.test_ui import UiTest as Base
 
 
 class V3e(Base):
+    def short_page(self, hash_=""):
+        # a 390x640 phone: the numbers screen is taller than the window, so scroll position is observable
+        ctx = self.br.new_context(viewport={"width": 390, "height": 640}, has_touch=True, is_mobile=True)
+        p = ctx.new_page(); p.goto(self.url + hash_); p.wait_for_selector("#go"); p.wait_for_timeout(150); return p
+
     def verdict(self, p):
         p.wait_for_selector(".verdict"); return p.locator(".verdict").inner_text()
 
@@ -35,7 +40,7 @@ class V3e(Base):
 
     # 3 a chip changes the method in place: same scroll position, no page-wide fade
     def test_chip_keeps_scroll_position(self):
-        p = self.page(); p.evaluate("window.scrollTo(0, 200)")
+        p = self.short_page(); p.evaluate("window.scrollTo(0, 200)")
         y0 = p.evaluate("window.scrollY"); self.assertGreater(y0, 100)
         p.locator("[role=radio]", has_text="Hybrid").tap(); p.wait_for_selector("#f-dry_basis")
         self.assertEqual(p.evaluate("window.scrollY"), y0)
@@ -43,7 +48,7 @@ class V3e(Base):
 
     # 4 Back and Change numbers return to where the person left the numbers
     def test_return_restores_scroll(self):
-        p = self.page("#/?method=hydrothermal"); p.evaluate("window.scrollTo(0, 120)"); y0 = p.evaluate("window.scrollY")
+        p = self.short_page("#/?method=hydrothermal"); p.evaluate("window.scrollTo(0, 120)"); y0 = p.evaluate("window.scrollY")
         self.assertGreater(y0, 60)
         p.tap("#go"); self.verdict(p); p.tap("#change"); p.wait_for_selector("#go"); p.wait_for_timeout(300)
         self.assertEqual(p.evaluate("window.scrollY"), y0)
@@ -64,5 +69,5 @@ class V3e(Base):
 
     def test_check_screen_has_one_graphic(self):
         p = self.page()
-        self.assertEqual(p.locator("#app svg.gfx").count(), 1)
-        self.assertLessEqual(p.locator("#app svg.gfx").bounding_box()["height"], 48)
+        self.assertEqual(p.locator("#app img.gfx").count(), 1)
+        self.assertLessEqual(p.locator("#app img.gfx").bounding_box()["height"], 48)
