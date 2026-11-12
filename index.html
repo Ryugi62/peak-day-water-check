@@ -22,9 +22,11 @@ main{max-width:520px;margin:0 auto;padding:80px 20px 128px}
 h1{font-size:28px;line-height:1.3;margin:0 0 8px;font-weight:700;outline:none}
 .lead{margin:0 0 24px;color:var(--sub);font-size:16px}
 label{display:block;margin:0 0 16px;font-size:14px;font-weight:600;color:var(--text)}
-input,select{display:block;width:100%;min-height:52px;margin-top:8px;padding:12px 16px;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:12px;transition:border-color .12s,box-shadow .12s}
+input,select{display:block;width:100%;min-height:52px;margin-top:8px;padding:12px 16px;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:12px;transition:border-color .12s}
 input:hover,select:hover{border-color:#b0b8c1}
-input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(27,100,218,.2)}
+input:focus{outline:2px solid var(--brand);outline-offset:0;border-color:var(--brand)}
+input.bad{border-color:var(--no-fg)}
+.ferr{display:block;margin-top:4px;font-size:14px;font-weight:600;color:var(--no-fg)}
 .hint{display:block;margin-top:4px;font-size:14px;font-weight:400;color:var(--sub)}
 .fine{font-size:14px;color:var(--sub);margin:8px 0 0}
 .err{background:var(--no-bg);color:var(--no-fg);border-radius:12px;padding:12px 16px;margin:0 0 24px;font-size:14px;font-weight:600}
@@ -33,10 +35,19 @@ input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0
 .cta:hover{background:var(--brand-press)}
 .cta:active{transform:scale(.98)}
 .cta:focus-visible,.back:focus-visible{outline:3px solid rgba(27,100,218,.4);outline-offset:2px}
-.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:700;margin:0 0 12px}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:600;margin:0 0 12px;background:var(--hold-bg);color:var(--hold-fg)}
+.mark{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font-size:20px;font-weight:800;margin:0 0 12px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 24px}
+.chip{min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:border-color .12s,background .12s,transform .08s}
+.chip:hover{border-color:#b0b8c1}.chip:active{transform:scale(.98)}
+.chip[aria-checked=true]{border-color:var(--brand);background:#e8f3ff;color:var(--brand)}
+.chip:focus-visible{outline:3px solid rgba(27,100,218,.4);outline-offset:2px}
+.grp{font-size:14px;font-weight:600;margin:0}
+.promise{margin:0 0 24px;font-size:14px;font-weight:600;color:var(--text)}
 .verdict{font-size:32px;line-height:1.25;font-weight:800;margin:0 0 16px;outline:none}
-.ok .pill{background:var(--ok-bg);color:var(--ok-fg)}.mid .pill{background:var(--warn-bg);color:var(--warn-fg)}
-.bad .pill{background:var(--no-bg);color:var(--no-fg)}.hold .pill{background:var(--hold-bg);color:var(--hold-fg)}
+.ok .vw{color:var(--ok-fg)}.mid .vw{color:var(--warn-fg)}.bad .vw{color:var(--no-fg)}.hold .vw{color:var(--hold-fg)}
+.ok .mark{background:var(--ok-bg);color:var(--ok-fg)}.mid .mark{background:var(--warn-bg);color:var(--warn-fg)}.bad .mark{background:var(--no-bg);color:var(--no-fg)}.hold .mark{background:var(--hold-bg);color:var(--hold-fg)}
+.back:hover{background:var(--hold-bg)}
 .why{margin:0 0 32px;padding:0;list-style:none}
 .why li{padding:12px 0;border-top:1px solid var(--line);font-size:16px}
 .why li:last-child{border-bottom:1px solid var(--line)}
@@ -66,23 +77,23 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
   var app = document.getElementById("app");
   var back = document.getElementById("back");
   var METHODS = {
-    evaporative: { label: "Evaporative (chiller + cooling tower)", fields: ["net_supply_m3", "peak_day_m3", "cycles"] },
-    liquid: { label: "Liquid + air hybrid", fields: ["net_supply_m3", "peak_day_m3", "cycles", "dry_basis"] },
-    hydrothermal: { label: "Hydrothermal (dam or river pass-through)", fields: ["heat_mw", "delta_t_k", "permit_flow_m3d", "source_distance_km"] },
-    direct_air: { label: "Direct evaporative air cooling", fields: [] }
+    evaporative: { label: "Evaporative", full: "Evaporative (chiller + cooling tower)", fields: ["net_supply_m3", "peak_day_m3", "cycles"] },
+    liquid: { label: "Hybrid", full: "Liquid + air hybrid", fields: ["net_supply_m3", "peak_day_m3", "cycles", "dry_basis"] },
+    hydrothermal: { label: "River or dam", full: "Hydrothermal (dam or river pass-through)", fields: ["heat_mw", "delta_t_k", "permit_flow_m3d", "source_distance_km"] },
+    direct_air: { label: "Direct air", full: "Direct evaporative air cooling", fields: [] }
   };
   var FIELD = {
-    net_supply_m3: ["Net water supply (m³/day)", "number", "Reclaimed water you can count on in a dry season"],
-    peak_day_m3: ["Peak-day cooling water need (m³/day)", "number", "Cooling make-up water on the hottest day"],
-    cycles: ["Cycles of concentration (N)", "number", "How many times cooling water is reused; must be above 1"],
+    net_supply_m3: ["Net water supply (m³/day)", "number", "Reclaimed water you can count on in a dry season", "3630"],
+    peak_day_m3: ["Peak-day cooling water need (m³/day)", "number", "Cooling make-up water on the hottest day", "2610"],
+    cycles: ["Cycles of concentration (N)", "number", "How many times cooling water is reused; must be above 1. It is checked for range only and does not change the ratio", "3"],
     dry_basis: ["Dry-cooling basis", "text", "One sentence from the chiller maker's sheet"],
-    heat_mw: ["Heat to reject (MW)", "number", "From the design document"],
-    delta_t_k: ["Allowed temperature rise (K)", "number", "The river authority's discharge limit"],
-    permit_flow_m3d: ["Permitted intake (m³/day)", "number", "From the intake consultation reply"],
-    source_distance_km: ["Distance to river or dam (km)", "number", "Road distance to the intake point"]
+    heat_mw: ["Heat to reject (MW)", "number", "From the design document", "48"],
+    delta_t_k: ["Allowed temperature rise (K)", "number", "The river authority's discharge limit", "7"],
+    permit_flow_m3d: ["Permitted intake (m³/day)", "number", "From the intake consultation reply", "3000"],
+    source_distance_km: ["Distance to river or dam (km)", "number", "Road distance to the intake point", "5"]
   };
   var DEFAULTS = { method: "evaporative", net_supply_m3: "3630", peak_day_m3: "2610", cycles: "3", heat_mw: "48" };
-  var STATION = "156 (Gwangju ASOS)";   /* example site's weather station, shown as fine print */
+  var STATION = "156 (Gwangju)";   /* example site's weather station, shown as fine print */
   var ALL_KEYS = Object.keys(FIELD);
   var CLS = { "Fit": "ok", "Conditional": "mid", "Not fit": "bad", "Hold": "hold" };
 
@@ -111,29 +122,33 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
 
   function renderCheck(vals, error) {
     var m = vals.method in METHODS ? vals.method : "evaporative";
+    var ek = error && typeof error === "object" ? error.key : "";
     var fields = METHODS[m].fields.map(function (k) {
-      var f = FIELD[k], v = vals[k] === undefined ? "" : vals[k];
-      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '" placeholder="Unknown? Leave blank"><span class="hint">' + esc(f[2]) + "</span></label>";
+      var f = FIELD[k], v = vals[k] === undefined ? "" : vals[k], bad = ek === k;
+      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '" placeholder="Unknown? Leave blank"' + (bad ? ' class="bad" aria-invalid="true" aria-describedby="f-' + k + '-err"' : "") + '><span class="hint">' + esc(f[2]) + "</span>" +
+        (bad ? '<span class="ferr" id="f-' + k + '-err" role="alert">' + esc(error.msg) + "</span>" : "") + "</label>";
     }).join("");
-    var opts = Object.keys(METHODS).map(function (k) { return '<option value="' + k + '"' + (k === m ? " selected" : "") + ">" + esc(METHODS[k].label) + "</option>"; }).join("");
-    var stationNote = (m === "evaporative" || m === "liquid") ? '<p class="fine">Weather station used: ' + esc(STATION) + ". Example site: Jangseong, Korea, 40 MW.</p>" : '<p class="fine">Example site: Jangseong, Korea, 40 MW.</p>';
+    var chips = Object.keys(METHODS).map(function (k) { return '<button type="button" class="chip" role="radio" data-m="' + k + '" aria-checked="' + (k === m) + '">' + esc(METHODS[k].label) + "</button>"; }).join("");
+    var stationNote = '<p class="fine">Example site: Jangseong, Korea, 40 MW' + ((m === "evaporative" || m === "liquid") ? ". Weather station: " + esc(STATION) : "") + ".</p>";
     var none = METHODS[m].fields.length ? "" : '<p class="lead">This method has no numbers to enter. We tell you why it is not judged.</p>';
-    setView('<h1 id="h" tabindex="-1">Peak-Day Water Check</h1>' +
-      '<p class="lead">Will a new data center have enough water on its hottest day? Enter the site numbers to get a verdict.</p>' +
-      (error ? '<p class="err" role="alert" id="error">' + esc(error) + "</p>" : "") +
-      '<form id="form" novalidate><label>Cooling method<select name="method" id="method">' + opts + "</select></label>" + none + fields + stationNote +
-      '<div class="cta-wrap"><button class="cta" id="go" type="submit">Check this site</button></div></form>', "#h");
+    var banner = typeof error === "string" ? '<p class="err" role="alert" id="error">' + esc(error) + "</p>" : "";
+    setView('<h1 id="h" tabindex="-1">Will this site have enough water on its hottest day?</h1>' +
+      '<p class="promise" id="promise">Don\'t know a number? Leave it blank. We hold the verdict instead of guessing.</p>' + banner +
+      '<form id="form" novalidate><p class="grp" id="grp">Cooling method</p><div class="chips" role="radiogroup" aria-labelledby="grp">' + chips + '</div><input type="hidden" name="method" value="' + m + '">' + none + fields + stationNote +
+      '<div class="cta-wrap"><button class="cta" id="go" type="submit">' + (METHODS[m].fields.length ? "Check this site" : "See why") + "</button></div></form>", ek ? "#f-" + ek : "#h");
     back.hidden = true;
     var form = document.getElementById("form");
-    form.method.addEventListener("change", function () { renderCheck(currentVals(form)); });
-    form.addEventListener("submit", function (e) { e.preventDefault(); location.hash = toHash("/result", currentVals(form)); });
+    Array.prototype.forEach.call(form.querySelectorAll(".chip"), function (c) {
+      c.addEventListener("click", function () { var v = currentVals(form); v.method = c.getAttribute("data-m"); history.replaceState(null, "", toHash("/", v)); renderCheck(v); });
+    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); var v = currentVals(form); history.replaceState(null, "", toHash("/", v)); location.hash = toHash("/result", v); });
   }
 
-  function num(raw, label) {
+  function num(raw, label, ex) {
     var s = String(raw === undefined ? "" : raw).trim();
     if (s === "") return { blank: true };
     var n = Number(s.replace(/,/g, ""));
-    if (!isFinite(n)) return { error: label + " must be a number. Enter digits only, like 3630." };
+    if (!isFinite(n)) return { error: label + " must be a number. Enter digits only, like " + ex + "." };
     return { value: n };
   }
 
@@ -143,7 +158,7 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
     if (m === "evaporative" || m === "liquid") facts.weather_station = STATION;
     METHODS[m].fields.forEach(function (k) {
       if (FIELD[k][1] === "text") { if (String(vals[k] || "").trim()) facts[k] = String(vals[k]).trim(); return; }
-      var r = num(vals[k], FIELD[k][0]); if (r.error) errors.push(r.error); else if (!r.blank) facts[k] = r.value;
+      var r = num(vals[k], FIELD[k][0], FIELD[k][3]); if (r.error) errors.push({ key: k, msg: r.error }); else if (!r.blank) facts[k] = r.value;
     });
     if (errors.length) { renderCheck(vals, errors[0]); history.replaceState(null, "", toHash("/", vals)); return; }
     var res;
@@ -168,12 +183,15 @@ h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
       ? '<ul class="todo">' + items.map(function (x) { return "<li><b>" + esc(x.name) + "</b><span>" + esc(x.how) + "</span></li>"; }).join("") + "</ul>"
       : '<p class="done">Pick another cooling method to get a verdict.</p>';
     var h2 = res.missing.length ? "Measure next" : (res.outOfScope ? "Next step" : "Confirm with real data");
-    setView('<div class="' + cls + '"><span class="pill">' + esc(METHODS[m].label) + "</span>" +
-      '<h1 class="verdict" id="h" tabindex="-1">' + esc(head) + "</h1></div>" +
+    var glyph = { ok: "\u2713", mid: "!", bad: "\u2715", hold: "?" }[cls];
+    var rest = head.slice(res.status.length);
+    setView('<div class="' + cls + '"><span class="mark" aria-hidden="true">' + glyph + "</span><br>" +
+      '<h1 class="verdict" id="h" tabindex="-1"><span class="vw">' + esc(res.status) + "</span>" + esc(rest) + "</h1>" +
+      '<span class="pill">' + esc(METHODS[m].full) + "</span></div>" +
       '<ul class="why"><li>' + esc(why[0]) + "</li><li>" + esc(why[1]) + "</li></ul>" +
       "<h2>" + h2 + "</h2>" + todo +
       '<p class="src">Runs in your browser. Same rule as the open-source engine: <a href="https://github.com/Ryugi62/peak-day-water-check">github.com/Ryugi62/peak-day-water-check</a></p>' +
-      '<div class="cta-wrap"><a class="cta" id="change" href="' + toHash("/", vals) + '">Change numbers</a></div>', "#h");
+      '<div class="cta-wrap"><a class="cta" id="change" href="' + toHash("/", vals) + '">' + (res.outOfScope ? "Pick another method" : "Change numbers") + "</a></div>", "#h");
     back.hidden = false; back.setAttribute("href", toHash("/", vals));
   }
 
