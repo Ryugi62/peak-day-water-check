@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Peak-Day Water Check</title>
+<meta name="description" content="Will a new data center have enough water on its hottest day? Enter site numbers, get a verdict and the list of measurements still needed.">
+<style>
+:root{--bg:#fff;--text:#191f28;--sub:#6b7684;--line:#e5e8eb;--brand:#1b64da;--brand-press:#1857bd;
+--ok-bg:#e6fcf5;--ok-fg:#087f5b;--warn-bg:#fff4e6;--warn-fg:#9c4f00;--no-bg:#ffebee;--no-fg:#c62828;--hold-bg:#f2f4f6;--hold-fg:#4e5968}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.bar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg);border-bottom:1px solid var(--line);z-index:10}
+.bar-in{max-width:520px;margin:0 auto;height:56px;display:grid;grid-template-columns:80px 1fr 80px;align-items:center;padding:0 12px}
+.bar-title{text-align:center;font-weight:700;font-size:16px}
+.back{min-height:44px;min-width:44px;display:inline-flex;align-items:center;color:var(--brand);font-weight:600;text-decoration:none;border-radius:8px;padding:0 8px}
+.back[hidden]{display:inline-flex;visibility:hidden}
+main{max-width:520px;margin:0 auto;padding:80px 20px 128px}
+.view{animation:in .18s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:28px;line-height:1.3;margin:0 0 8px;font-weight:700;outline:none}
+.lead{margin:0 0 24px;color:var(--sub);font-size:16px}
+label{display:block;margin:0 0 16px;font-size:14px;font-weight:600;color:var(--text)}
+input,select{display:block;width:100%;min-height:52px;margin-top:8px;padding:12px 16px;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:12px;transition:border-color .12s,box-shadow .12s}
+input:hover,select:hover{border-color:#b0b8c1}
+input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(27,100,218,.2)}
+.hint{display:block;margin-top:4px;font-size:14px;font-weight:400;color:var(--sub)}
+.fine{font-size:14px;color:var(--sub);margin:8px 0 0}
+.err{background:var(--no-bg);color:var(--no-fg);border-radius:12px;padding:12px 16px;margin:0 0 24px;font-size:14px;font-weight:600}
+.cta-wrap{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(rgba(255,255,255,0),#fff 28%);padding:16px 20px calc(16px + env(safe-area-inset-bottom));z-index:9}
+.cta{display:block;width:100%;max-width:480px;margin:0 auto;min-height:56px;border:0;border-radius:16px;background:var(--brand);color:#fff;font:inherit;font-size:17px;font-weight:700;text-align:center;text-decoration:none;line-height:56px;cursor:pointer;transition:background .12s,transform .08s}
+.cta:hover{background:var(--brand-press)}
+.cta:active{transform:scale(.98)}
+.cta:focus-visible,.back:focus-visible{outline:3px solid rgba(27,100,218,.4);outline-offset:2px}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:700;margin:0 0 12px}
+.verdict{font-size:32px;line-height:1.25;font-weight:800;margin:0 0 16px;outline:none}
+.ok .pill{background:var(--ok-bg);color:var(--ok-fg)}.mid .pill{background:var(--warn-bg);color:var(--warn-fg)}
+.bad .pill{background:var(--no-bg);color:var(--no-fg)}.hold .pill{background:var(--hold-bg);color:var(--hold-fg)}
+.why{margin:0 0 32px;padding:0;list-style:none}
+.why li{padding:12px 0;border-top:1px solid var(--line);font-size:16px}
+.why li:last-child{border-bottom:1px solid var(--line)}
+h2{font-size:20px;line-height:1.35;margin:0 0 12px;font-weight:700}
+.todo{margin:0;padding:0;list-style:none}
+.todo li{padding:16px 0;border-top:1px solid var(--line)}
+.todo b{display:block;font-size:16px}
+.todo span{display:block;font-size:14px;color:var(--sub);margin-top:4px}
+.done{color:var(--sub);margin:0}
+.src{margin-top:32px;font-size:14px;color:var(--sub)}
+.src a{color:var(--brand)}
+@media (prefers-reduced-motion:reduce){.view{animation:none}.cta{transition:none}}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" id="back" href="#/" hidden aria-label="Back to the numbers">&lsaquo; Back</a>
+  <div class="bar-title">Peak-Day Water Check</div><span></span>
+</div></header>
+<main id="app"></main>
+<noscript><p style="padding:96px 20px">Peak-Day Water Check needs JavaScript to run. It works offline once loaded and sends no data anywhere.</p></noscript>
+<script src="verdict.js"></script>
+<script>
+(function () {
+  "use strict";
+  var P = window.PeakDay;
+  var app = document.getElementById("app");
+  var back = document.getElementById("back");
+  var METHODS = {
+    evaporative: { label: "Evaporative (chiller + cooling tower)", fields: ["net_supply_m3", "peak_day_m3", "cycles"] },
+    liquid: { label: "Liquid + air hybrid", fields: ["net_supply_m3", "peak_day_m3", "cycles", "dry_basis"] },
+    hydrothermal: { label: "Hydrothermal (dam or river pass-through)", fields: ["heat_mw", "delta_t_k", "permit_flow_m3d", "source_distance_km"] },
+    direct_air: { label: "Direct evaporative air cooling", fields: [] }
+  };
+  var FIELD = {
+    net_supply_m3: ["Net water supply (m³/day)", "number", "Reclaimed water you can count on in a dry season"],
+    peak_day_m3: ["Peak-day cooling water need (m³/day)", "number", "Cooling make-up water on the hottest day"],
+    cycles: ["Cycles of concentration (N)", "number", "How many times cooling water is reused; must be above 1"],
+    dry_basis: ["Dry-cooling basis", "text", "One sentence from the chiller maker's sheet"],
+    heat_mw: ["Heat to reject (MW)", "number", "From the design document"],
+    delta_t_k: ["Allowed temperature rise (K)", "number", "The river authority's discharge limit"],
+    permit_flow_m3d: ["Permitted intake (m³/day)", "number", "From the intake consultation reply"],
+    source_distance_km: ["Distance to river or dam (km)", "number", "Road distance to the intake point"]
+  };
+  var DEFAULTS = { method: "evaporative", net_supply_m3: "3630", peak_day_m3: "2610", cycles: "3", heat_mw: "48" };
+  var STATION = "156 (Gwangju ASOS)";   /* example site's weather station, shown as fine print */
+  var ALL_KEYS = Object.keys(FIELD);
+  var CLS = { "Fit": "ok", "Conditional": "mid", "Not fit": "bad", "Hold": "hold" };
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function parseHash() {
+    var h = location.hash.replace(/^#/, ""), q = h.indexOf("?");
+    var route = (q < 0 ? h : h.slice(0, q)) || "/", params = {};
+    if (q >= 0) h.slice(q + 1).split("&").forEach(function (kv) { if (!kv) return; var i = kv.indexOf("="); params[decodeURIComponent(i < 0 ? kv : kv.slice(0, i))] = i < 0 ? "" : decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " ")); });
+    return { route: route, params: params };
+  }
+  function toHash(route, vals) {
+    return "#" + route + "?" + Object.keys(vals).filter(function (k) { return vals[k] !== "" && vals[k] !== undefined; }).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(vals[k]); }).join("&");
+  }
+  function fmt(n) { return Number(n).toLocaleString("en-US", { maximumFractionDigits: 1 }); }
+  function setView(html, focusSel) {
+    app.innerHTML = '<div class="view">' + html + "</div>";
+    window.scrollTo(0, 0);
+    var f = app.querySelector(focusSel); if (f) f.focus({ preventScroll: true });
+  }
+
+  function currentVals(form) {
+    var v = { method: form.method.value };
+    ALL_KEYS.forEach(function (k) { if (form.elements[k]) v[k] = form.elements[k].value; });
+    return v;
+  }
+
+  function renderCheck(vals, error) {
+    var m = vals.method in METHODS ? vals.method : "evaporative";
+    var fields = METHODS[m].fields.map(function (k) {
+      var f = FIELD[k], v = vals[k] === undefined ? "" : vals[k];
+      return '<label>' + esc(f[0]) + '<input name="' + k + '" id="f-' + k + '" type="text" inputmode="' + (f[1] === "number" ? "decimal" : "text") + '" autocomplete="off" value="' + esc(v) + '" placeholder="Unknown? Leave blank"><span class="hint">' + esc(f[2]) + "</span></label>";
+    }).join("");
+    var opts = Object.keys(METHODS).map(function (k) { return '<option value="' + k + '"' + (k === m ? " selected" : "") + ">" + esc(METHODS[k].label) + "</option>"; }).join("");
+    var stationNote = (m === "evaporative" || m === "liquid") ? '<p class="fine">Weather station used: ' + esc(STATION) + ". Example site: Jangseong, Korea, 40 MW.</p>" : '<p class="fine">Example site: Jangseong, Korea, 40 MW.</p>';
+    var none = METHODS[m].fields.length ? "" : '<p class="lead">This method has no numbers to enter. We tell you why it is not judged.</p>';
+    setView('<h1 id="h" tabindex="-1">Peak-Day Water Check</h1>' +
+      '<p class="lead">Will a new data center have enough water on its hottest day? Enter the site numbers to get a verdict.</p>' +
+      (error ? '<p class="err" role="alert" id="error">' + esc(error) + "</p>" : "") +
+      '<form id="form" novalidate><label>Cooling method<select name="method" id="method">' + opts + "</select></label>" + none + fields + stationNote +
+      '<div class="cta-wrap"><button class="cta" id="go" type="submit">Check this site</button></div></form>', "#h");
+    back.hidden = true;
+    var form = document.getElementById("form");
+    form.method.addEventListener("change", function () { renderCheck(currentVals(form)); });
+    form.addEventListener("submit", function (e) { e.preventDefault(); location.hash = toHash("/result", currentVals(form)); });
+  }
+
+  function num(raw, label) {
+    var s = String(raw === undefined ? "" : raw).trim();
+    if (s === "") return { blank: true };
+    var n = Number(s.replace(/,/g, ""));
+    if (!isFinite(n)) return { error: label + " must be a number. Enter digits only, like 3630." };
+    return { value: n };
+  }
+
+  function renderResult(vals) {
+    var m = vals.method in METHODS ? vals.method : "evaporative";
+    var facts = {}, errors = [];
+    if (m === "evaporative" || m === "liquid") facts.weather_station = STATION;
+    METHODS[m].fields.forEach(function (k) {
+      if (FIELD[k][1] === "text") { if (String(vals[k] || "").trim()) facts[k] = String(vals[k]).trim(); return; }
+      var r = num(vals[k], FIELD[k][0]); if (r.error) errors.push(r.error); else if (!r.blank) facts[k] = r.value;
+    });
+    if (errors.length) { renderCheck(vals, errors[0]); history.replaceState(null, "", toHash("/", vals)); return; }
+    var res;
+    try { res = P.judgeOption(m, facts); }
+    catch (e) { renderCheck(vals, "One number is out of range. Peak-day need and heat must be above 0, cycles above 1, temperature rise above 0."); history.replaceState(null, "", toHash("/", vals)); return; }
+    var head, why;
+    if (res.outOfScope) {
+      head = "Hold · not judged";
+      why = ["The engine has no water-use physics for direct evaporative air cooling.", "We hold the verdict instead of guessing."];
+    } else if (res.status === "Hold") {
+      head = "Hold · measure first";
+      why = ["Not enough measured facts to judge this site.", "We never fill a missing number with a guess."];
+    } else {
+      head = res.status + " · " + res.ratio.toFixed(2) + "×";
+      var unit = m === "hydrothermal" ? ["Permitted intake ", " m³/day ÷ flow needed to carry the heat ", " m³/day"] : ["Net supply ", " m³/day ÷ peak-day need ", " m³/day"];
+      why = [unit[0] + fmt(res.numerator) + unit[1] + fmt(res.denominator) + unit[2] + " = " + res.ratio.toFixed(2) + "×.",
+        "Rule: 2× or more is fit, 1× to 2× is conditional, under 1× is not fit."];
+    }
+    var cls = CLS[res.status];
+    var items = res.missing.length ? res.missing : (res.outOfScope ? [] : P.REQUIRED[m].map(function (k) { return { name: P.MEASURE[k][0], how: P.MEASURE[k][1] }; }));
+    var todo = items.length
+      ? '<ul class="todo">' + items.map(function (x) { return "<li><b>" + esc(x.name) + "</b><span>" + esc(x.how) + "</span></li>"; }).join("") + "</ul>"
+      : '<p class="done">Pick another cooling method to get a verdict.</p>';
+    var h2 = res.missing.length ? "Measure next" : (res.outOfScope ? "Next step" : "Confirm with real data");
+    setView('<div class="' + cls + '"><span class="pill">' + esc(METHODS[m].label) + "</span>" +
+      '<h1 class="verdict" id="h" tabindex="-1">' + esc(head) + "</h1></div>" +
+      '<ul class="why"><li>' + esc(why[0]) + "</li><li>" + esc(why[1]) + "</li></ul>" +
+      "<h2>" + h2 + "</h2>" + todo +
+      '<p class="src">Runs in your browser. Same rule as the open-source engine: <a href="https://github.com/Ryugi62/peak-day-water-check">github.com/Ryugi62/peak-day-water-check</a></p>' +
+      '<div class="cta-wrap"><a class="cta" id="change" href="' + toHash("/", vals) + '">Change numbers</a></div>', "#h");
+    back.hidden = false; back.setAttribute("href", toHash("/", vals));
+  }
+
+  function route() {
+    var p = parseHash(), vals = {};
+    Object.keys(DEFAULTS).forEach(function (k) { vals[k] = DEFAULTS[k]; });
+    var hasParams = Object.keys(p.params).length > 0;
+    if (hasParams) { vals = { method: "evaporative" }; Object.keys(p.params).forEach(function (k) { vals[k] = p.params[k]; }); }
+    if (p.route === "/result") renderResult(vals); else renderCheck(vals);
+  }
+  window.addEventListener("hashchange", route);
+  route();
+})();
+</script>
+</body>
+</html>
